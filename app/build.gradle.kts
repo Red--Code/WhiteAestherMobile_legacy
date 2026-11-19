@@ -67,7 +67,7 @@ android {
 
     defaultConfig {
         applicationId = "com.whitedns.whiteaesther"
-        minSdk = 26
+        minSdk = 23
         targetSdk = 36
         versionCode = appVersionCode.get()
         versionName = appVersionName.get()
@@ -160,6 +160,8 @@ android {
     }
 
     compileOptions {
+        // Backport java.time and java.util.Base64 for Android 6 (API 23).
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -229,6 +231,9 @@ kotlin {
 }
 
 dependencies {
+    // java.time / java.util.Base64 are not native on API 23.
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
+
     implementation("androidx.core:core-ktx:1.18.0")
     implementation("androidx.activity:activity-compose:1.13.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.10.0")
@@ -305,12 +310,12 @@ fun registerCargoNdkTask(name: String, release: Boolean) = tasks.register<Exec>(
     if (windowsHost) {
         // cargo-ndk normalizes exported NDK paths only for MSYS/Cygwin hosts.
         environment("MSYSTEM", "CARGO_NDK_PATH_NORMALIZATION")
-        environment("CC_aarch64-linux-android", clangBin.map { "$it/aarch64-linux-android26-clang.cmd" }.get())
-        environment("CXX_aarch64-linux-android", clangBin.map { "$it/aarch64-linux-android26-clang++.cmd" }.get())
-        environment("CC_armv7-linux-androideabi", clangBin.map { "$it/armv7a-linux-androideabi26-clang.cmd" }.get())
-        environment("CXX_armv7-linux-androideabi", clangBin.map { "$it/armv7a-linux-androideabi26-clang++.cmd" }.get())
-        environment("CC_x86_64-linux-android", clangBin.map { "$it/x86_64-linux-android26-clang.cmd" }.get())
-        environment("CXX_x86_64-linux-android", clangBin.map { "$it/x86_64-linux-android26-clang++.cmd" }.get())
+        environment("CC_aarch64-linux-android", clangBin.map { "$it/aarch64-linux-android23-clang.cmd" }.get())
+        environment("CXX_aarch64-linux-android", clangBin.map { "$it/aarch64-linux-android23-clang++.cmd" }.get())
+        environment("CC_armv7-linux-androideabi", clangBin.map { "$it/armv7a-linux-androideabi23-clang.cmd" }.get())
+        environment("CXX_armv7-linux-androideabi", clangBin.map { "$it/armv7a-linux-androideabi23-clang++.cmd" }.get())
+        environment("CC_x86_64-linux-android", clangBin.map { "$it/x86_64-linux-android23-clang.cmd" }.get())
+        environment("CXX_x86_64-linux-android", clangBin.map { "$it/x86_64-linux-android23-clang++.cmd" }.get())
     }
     commandLine(
         buildList {
@@ -319,7 +324,7 @@ fun registerCargoNdkTask(name: String, release: Boolean) = tasks.register<Exec>(
                     "cargo",
                     "ndk",
                     "--platform",
-                    "26",
+                    "23",
                     *androidAbis.flatMap { listOf("-t", it) }.toTypedArray(),
                     "-o",
                     outputDir.get().asFile.absolutePath,
