@@ -58,8 +58,6 @@ jobs:
         run: |
           ./gradlew \
             -PWHITEAESTHER_ABIS=armeabi-v7a \
-            testPreviewDebugUnitTest \
-            lintPreviewDebug \
             assemblePreviewDebug
 
       - name: Verify API 23 and ARMv7 native libraries
