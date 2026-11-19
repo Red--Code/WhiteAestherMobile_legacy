@@ -263,7 +263,9 @@ dependencies {
     // time and, worse, one `libgojni.so` silently winning over the other at
     // packaging time. The transports come as their own executables instead, in
     // native/tor, which is also how tor expects to launch them.
-    implementation("info.guardianproject:tor-android:0.4.9.11")
+    // Tor 0.4.8.16 via the API-21-compatible 0.4.8.13.2 Android wrapper.
+    // Newer 0.4.9.x wrappers require API 24 and break Android 6 (API 23).
+    implementation("info.guardianproject:tor-android:0.4.8.13.2")
     implementation("info.guardianproject:jtorctl:0.4.5.7")
 
     implementation("androidx.compose.ui:ui:1.11.4")
