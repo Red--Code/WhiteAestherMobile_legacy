@@ -85,6 +85,6 @@ jobs:
           jar tf "$apk" | grep -qF "assets/psiphon_server_entries.txt"
           python3 tools/verify_native_dependencies.py \
             --ndk "${ANDROID_HOME}/ndk/29.0.14206865" "$apk"
-          "${ANDROID_HOME}/build-tools/${ANDROID_BUILD_TOOLS}/aapt2" \
-            dump badging "$apk" | grep -F "sdkVersion:'23'"
-
+          build_tools_dir="$(find "${ANDROID_HOME}/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n 1)"
+          test -n "$build_tools_dir"
+          "$build_tools_dir/aapt2" dump badging "$apk" | grep -F "sdkVersion:'23'"
