@@ -1,0 +1,88 @@
+name: Android 6 ARMv7 test APK
+run-name: Android 6 ARMv7 APK on ${{ github.ref_name }}
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/android6-armv7.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android6-armv7-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build Android 6.0 (armeabi-v7a) APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: ./.github/actions/android-toolchain
+        with:
+          rust-components: rustfmt, clippy
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version: "1.25"
+          cache: false
+
+      - name: Build the exit chain engine
+        shell: pwsh
+        run: |
+          ./native/chain/setup.ps1
+          ./native/chain/build.ps1 -Abi @('armeabi-v7a')
+
+      - name: Fetch the Psiphon server list
+        shell: pwsh
+        run: ./native/psiphon/setup.ps1
+
+      - name: Build the Tor pluggable transports
+        shell: pwsh
+        run: |
+          ./native/tor/setup.ps1
+          ./native/tor/build.ps1 -Abi @('armeabi-v7a')
+
+      - name: Build the Xray engine
+        shell: pwsh
+        run: ./native/xray/build.ps1 -Abi @('armeabi-v7a')
+
+      - name: Build and test the ARMv7 APK
+        run: |
+          ./gradlew \
+            -PWHITEAESTHER_ABIS=armeabi-v7a \
+            testPreviewDebugUnitTest \
+            lintPreviewDebug \
+            assemblePreviewDebug
+
+      - name: Verify API 23 and ARMv7 native libraries
+        shell: bash
+        run: |
+          set -euo pipefail
+          apk="app/build/outputs/apk/preview/debug/app-preview-armeabi-v7a-debug.apk"
+          test -f "$apk"
+          jar tf "$apk" | grep -F "lib/armeabi-v7a/libwhiteaesther_core.so"
+          jar tf "$apk" | grep -F "lib/armeabi-v7a/libwhiteaestherchain.so"
+          jar tf "$apk" | grep -F "lib/armeabi-v7a/libwhiteaesther_xray.so"
+          jar tf "$apk" | grep -F "lib/armeabi-v7a/libgojni.so"
+          jar tf "$apk" | grep -F "lib/armeabi-v7a/libtor.so"
+          jar tf "$apk" | grep -F "lib/armeabi-v7a/liblyrebird.so"
+          jar tf "$apk" | grep -F "lib/armeabi-v7a/libsnowflake.so"
+          jar tf "$apk" | grep -qF "assets/psiphon_server_entries.txt"
+          python3 tools/verify_native_dependencies.py \
+            --ndk "${ANDROID_HOME}/ndk/29.0.14206865" "$apk"
+          "${ANDROID_HOME}/build-tools/${ANDROID_BUILD_TOOLS}/aapt2" \
+            dump badging "$apk" | grep -F "sdkVersion:'23'"
+
+      - name: Upload Android 6 ARMv7 APK
+        uses: actions/upload-artifact@v7
+        with:
+          name: whiteaesther-android6-armv7
+          path: app/build/outputs/apk/preview/debug/app-preview-armeabi-v7a-debug.apk
+          if-no-files-found: error
+          retention-days: 14
