@@ -9,6 +9,7 @@ on:
       - ".github/workflows/android6-armv7.yml"
       - "app/build.gradle.kts"
       - "settings.gradle.kts"
+      - "native/tor/setup.ps1"
 
 permissions:
   contents: read
