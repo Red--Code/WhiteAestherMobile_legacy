@@ -12,9 +12,9 @@ $hostTag = if ($IsLinux) { 'linux-x86_64' } elseif ($IsMacOS) { 'darwin-x86_64' 
 $suffix = if ($IsWindows) { '.cmd' } else { '' }
 $bin = Join-Path $sdk "ndk/29.0.14206865/toolchains/llvm/prebuilt/$hostTag/bin"
 $targets = @{
-    'arm64-v8a' = @('arm64', 'aarch64-linux-android26-clang')
-    'x86_64' = @('amd64', 'x86_64-linux-android26-clang')
-    'armeabi-v7a' = @('arm', 'armv7a-linux-androideabi26-clang')
+    'arm64-v8a' = @('arm64', 'aarch64-linux-android23-clang')
+    'x86_64' = @('amd64', 'x86_64-linux-android23-clang')
+    'armeabi-v7a' = @('arm', 'armv7a-linux-androideabi23-clang')
 }
 $previous = @{}
 foreach ($name in @('GOOS', 'GOARCH', 'GOARM', 'CGO_ENABLED', 'CC', 'GOTOOLCHAIN')) {

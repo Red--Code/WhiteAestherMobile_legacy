@@ -136,7 +136,7 @@ See [connection improvements](docs/CONNECTION_IMPROVEMENTS.md) and
 
 ## Requirements
 
-Android 8.0 (API 26) or newer, on `arm64-v8a`, `armeabi-v7a` or `x86_64`.
+Android 6.0 (API 23) or newer, on `armeabi-v7a` (32-bit ARM), `arm64-v8a` or `x86_64`. Android 6.0 devices must use the `armeabi-v7a` APK; some newer notification and background-execution features remain limited by the operating system.
 
 ## Build from source
 

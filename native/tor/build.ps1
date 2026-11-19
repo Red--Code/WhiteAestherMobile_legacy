@@ -80,11 +80,11 @@ $bin = Join-Path $ndk "toolchains/llvm/prebuilt/$hostTag/bin"
 if (-not (Test-Path $bin)) { throw "NDK toolchain not found for this host: $bin" }
 $ext = if ($IsLinux -or $IsMacOS) { '' } else { '.cmd' }
 
-# minSdk is 26, so the toolchain is pinned there rather than to the NDK default.
+# minSdk is 23, so the toolchain is pinned there rather than to the NDK default.
 $targets = @{
-    'arm64-v8a'   = @{ Arch = 'arm64'; Clang = "aarch64-linux-android26-clang$ext";    Arm = $null }
-    'x86_64'      = @{ Arch = 'amd64'; Clang = "x86_64-linux-android26-clang$ext";     Arm = $null }
-    'armeabi-v7a' = @{ Arch = 'arm';   Clang = "armv7a-linux-androideabi26-clang$ext"; Arm = '7'  }
+    'arm64-v8a'   = @{ Arch = 'arm64'; Clang = "aarch64-linux-android23-clang$ext";    Arm = $null }
+    'x86_64'      = @{ Arch = 'amd64'; Clang = "x86_64-linux-android23-clang$ext";     Arm = $null }
+    'armeabi-v7a' = @{ Arch = 'arm';   Clang = "armv7a-linux-androideabi23-clang$ext"; Arm = '7'  }
 }
 
 foreach ($name in $Abi) {
