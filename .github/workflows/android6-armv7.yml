@@ -60,6 +60,14 @@ jobs:
             -PWHITEAESTHER_ABIS=armeabi-v7a \
             assemblePreviewDebug
 
+      - name: Upload Android 6 ARMv7 APK
+        uses: actions/upload-artifact@v7
+        with:
+          name: whiteaesther-android6-armv7
+          path: app/build/outputs/apk/preview/debug/app-preview-armeabi-v7a-debug.apk
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Verify API 23 and ARMv7 native libraries
         shell: bash
         run: |
@@ -79,10 +87,3 @@ jobs:
           "${ANDROID_HOME}/build-tools/${ANDROID_BUILD_TOOLS}/aapt2" \
             dump badging "$apk" | grep -F "sdkVersion:'23'"
 
-      - name: Upload Android 6 ARMv7 APK
-        uses: actions/upload-artifact@v7
-        with:
-          name: whiteaesther-android6-armv7
-          path: app/build/outputs/apk/preview/debug/app-preview-armeabi-v7a-debug.apk
-          if-no-files-found: error
-          retention-days: 14
