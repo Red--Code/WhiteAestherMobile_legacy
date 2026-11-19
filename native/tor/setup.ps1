@@ -49,14 +49,34 @@ foreach ($transport in $Transports) {
     }
 
     Write-Host "fetching $($transport.Name) $($transport.Rev)..." -ForegroundColor Cyan
-    if (Test-Path $dir) { Remove-Item $dir -Recurse -Force }
-    # No --depth: a shallow clone cannot check out an arbitrary revision, and
-    # the pin is worth more than the download it saves.
-    git clone --quiet --filter=blob:none $transport.Repo $dir 2>&1 | Out-Null
-    Push-Location $dir
-    git checkout --quiet $transport.Rev 2>&1 | Out-Null
-    if ($LASTEXITCODE -ne 0) { Pop-Location; throw "could not check out $($transport.Name) $($transport.Rev)" }
-    Pop-Location
+    $ready = $false
+    $lastError = ""
+
+    # These are pinned release tags, so a shallow tag clone is sufficient and
+    # avoids transferring the full history. Retry transient GitLab failures.
+    for ($attempt = 1; $attempt -le 3 -and -not $ready; $attempt++) {
+        if (Test-Path $dir) { Remove-Item $dir -Recurse -Force }
+        $cloneOutput = & git clone --quiet --depth 1 --branch $transport.Rev $transport.Repo $dir 2>&1
+        $cloneExit = $LASTEXITCODE
+
+        if ($cloneExit -eq 0 -and (Test-Path (Join-Path $dir 'go.mod'))) {
+            $ready = $true
+            break
+        }
+
+        $lastError = ($cloneOutput | Out-String).Trim()
+        if ([string]::IsNullOrWhiteSpace($lastError)) {
+            $lastError = "git clone exited with code $cloneExit"
+        }
+        Write-Warning "$($transport.Name) clone attempt $attempt/3 failed: $lastError"
+        if (Test-Path $dir) { Remove-Item $dir -Recurse -Force }
+        if ($attempt -lt 3) { Start-Sleep -Seconds (2 * $attempt) }
+    }
+
+    if (-not $ready) {
+        throw "Could not fetch $($transport.Name) $($transport.Rev) after 3 attempts. Last error: $lastError"
+    }
+
     Write-Host "  -> native/tor/third_party/$($transport.Name)" -ForegroundColor Green
 }
 
